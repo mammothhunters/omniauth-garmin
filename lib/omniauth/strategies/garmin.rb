@@ -10,10 +10,10 @@ module OmniAuth
       # This is where you pass the options you would pass when
       # initializing your consumer from the OAuth gem.
       option :client_options, {
-          :site               => 'http://connectapitest.garmin.com',
-          :authorize_url      => 'http://connecttest.garmin.com/oauthConfirm',
-          :request_token_url  => 'http://connectapitest.garmin.com/oauth-service-1.0/oauth/request_token',
-          :access_token_url   => 'http://connectapitest.garmin.com/oauth-service-1.0/oauth/access_token'
+          :site               => 'https://connectapitest.garmin.com',
+          :authorize_url      => 'https://connecttest.garmin.com/oauthConfirm',
+          :request_token_url  => 'https://connectapitest.garmin.com/oauth-service-1.0/oauth/request_token',
+          :access_token_url   => 'https://connectapitest.garmin.com/oauth-service-1.0/oauth/access_token'
       }
 
       # These are called after authentication has succeeded. If
@@ -22,16 +22,17 @@ module OmniAuth
       # or as a URI parameter). This may not be possible with all
       # providers.
       uid do
-        raw_info
+        ap raw_info
+        nil
       end
 
       info do
-        {
-            :info => raw_info,
-        }
+        ap "HELLO"
+        nil
       end
 
       def raw_info
+        ap access_token + " in raw info"
         access_token
       end
     end

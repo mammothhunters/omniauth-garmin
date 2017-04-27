@@ -13,8 +13,21 @@ module OmniAuth
           :site               => 'https://connectapitest.garmin.com',
           :authorize_url      => 'https://connecttest.garmin.com/oauthConfirm',
           :request_token_url  => 'https://connectapitest.garmin.com/oauth-service-1.0/oauth/request_token',
-          :access_token_url   => 'https://connectapitest.garmin.com/oauth-service-1.0/oauth/access_token'
+          :access_token_url   => 'https://connectapitest.garmin.com/oauth-service-1.0/oauth/access_token',
       }
+
+      def request_phase # Overriding to force oauth_callback to be included (for dev / test environments)
+        request_token = consumer.get_request_token({:oauth_callback => callback_url}, options.request_params)
+        session["oauth"] ||= {}
+        session["oauth"][name.to_s] = {"callback_confirmed" => request_token.callback_confirmed?, "request_token" => request_token.token, "request_secret" => request_token.secret}
+
+        redirect request_token.authorize_url(options[:authorize_params].merge(:oauth_callback => callback_url))
+
+      rescue ::Timeout::Error => e
+        fail!(:timeout, e)
+      rescue ::Net::HTTPFatalError, ::OpenSSL::SSL::SSLError => e
+        fail!(:service_unavailable, e)
+      end
 
       # These are called after authentication has succeeded. If
       # possible, you should try to set the UID without making
@@ -22,17 +35,16 @@ module OmniAuth
       # or as a URI parameter). This may not be possible with all
       # providers.
       uid do
-        ap raw_info
-        nil
+        access_token.token
       end
 
       info do
-        ap "HELLO"
-        nil
+        {
+
+        }
       end
 
       def raw_info
-        ap access_token + " in raw info"
         access_token
       end
     end
